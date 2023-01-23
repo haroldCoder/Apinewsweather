@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Net.Http;
+using restApi.Context;
+using restApi.Models;
 
 namespace restApi.Controllers
 {
@@ -12,6 +14,11 @@ namespace restApi.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+        private readonly ConectionSql context;
+        public ValuesController(ConectionSql context)
+        {
+            this.context = context;
+        }
         // GET api/values
         public class News
         {
@@ -68,7 +75,11 @@ namespace restApi.Controllers
             var data = new { news, weather };
             return Ok(data);
         }
-
+        [HttpGet("history")]
+        public IEnumerable<History> Get()
+        {
+            return context.History.ToList();
+        }
         // GET api/values/5
         [HttpGet("{id}")]
         public ActionResult<string> Get(int id)
@@ -78,8 +89,18 @@ namespace restApi.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Post([FromBody] History history)
         {
+            try
+            {
+                context.History.Add(history);
+                await context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT api/values/5
