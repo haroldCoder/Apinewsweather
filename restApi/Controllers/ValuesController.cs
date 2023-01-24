@@ -41,14 +41,14 @@ namespace restApi.Controllers
             public string Id { get; set; }
             public string Name { get; set; }
         }
-        public async Task<object> getWeather(string city)
+        public async Task<object> getWeather(string city, string country)
         {
             try
             {
                 HttpClient httpClient = new HttpClient();
                 var _httpClient = httpClient;
                 _httpClient.DefaultRequestHeaders.Add("User-Agent", "restApi");
-                var url = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid=a8d56ad88b9efcd3f6da2a86517746ed";
+                var url = $"https://api.openweathermap.org/data/2.5/weather?q={city}, {country}&appid=a8d56ad88b9efcd3f6da2a86517746ed";
                 var response = await _httpClient.GetAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
                 var weather = JsonConvert.DeserializeObject(json);
@@ -68,10 +68,10 @@ namespace restApi.Controllers
             return JsonConvert.DeserializeObject<News>(json);
         }
         [HttpGet]
-        public async Task<IActionResult> Get(string city)
+        public async Task<IActionResult> Get(string city, string country)
         {
             var news = await getNews(city);
-            var weather = await getWeather(city);
+            var weather = await getWeather(city, country);
             var data = new { news, weather };
             return Ok(data);
         }
@@ -88,7 +88,7 @@ namespace restApi.Controllers
         }
 
         // POST api/values
-        [HttpPost]
+        [HttpPost("history")]
         public async Task<IActionResult> Post([FromBody] History history)
         {
             try

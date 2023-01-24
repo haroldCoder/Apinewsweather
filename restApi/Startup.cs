@@ -28,7 +28,16 @@ namespace restApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ConectionSql>(option => option.UseSqlServer(Configuration.GetConnectionString("conexionsql"), b => b.EnableRetryOnFailure()));
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .AllowCredentials();
+                });
+            });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
@@ -37,13 +46,7 @@ namespace restApi
         {
             if (env.IsDevelopment())
             {
-                app.UseCors(options =>
-                {
-                    options.WithOrigins("*");
-                    options.WithMethods();
-                    options.WithHeaders();
-                });
-                app.UseDeveloperExceptionPage();
+                app.UseCors("AllowAll");
             }
             else
             {
